@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sylvia Mafra Machado - Gestão de Ocorrências</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    
+    <style>
+        :root {
+            --primary: #2563eb;
+            --danger: #dc2626;
+            --success: #16a34a;
+            --bg: #f1f5f9;
+            --text: #1e293b;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, sans-serif; 
+            background-color: var(--bg); 
+            color: var(--text);
+            margin: 0; padding: 15px;
+            display: flex; justify-content: center;
+        }
+
+        .app-card {
+            width: 100%; max-width: 500px;
+            background: white;
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+
+        .header { text-align: center; margin-bottom: 25px; border-bottom: 3px solid var(--primary); padding-bottom: 15px; }
+        .header h1 { margin: 0; font-size: 20px; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+        .header p { font-size: 13px; color: #64748b; margin-top: 5px; }
+
+        .form-group { margin-bottom: 15px; }
+        label { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 6px; display: block; }
+
+        input, select, textarea {
+            width: 100%; padding: 12px;
+            border: 2px solid #e2e8f0; border-radius: 10px;
+            font-size: 16px; box-sizing: border-box;
+            background-color: #f8fafc;
+        }
+
+        .btn-main {
+            background: var(--primary); color: white; border: none;
+            padding: 16px; width: 100%; border-radius: 10px;
+            font-size: 16px; font-weight: bold; cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-main:disabled { background: #94a3b8; }
+
+        .actions-history {
+            display: flex; gap: 10px; margin-top: 15px;
+        }
+
+        .btn-sec {
+            flex: 1; padding: 10px; border-radius: 8px; border: none;
+            font-size: 12px; font-weight: bold; cursor: pointer;
+        }
+
+        .btn-pdf { background: var(--success); color: white; }
+        .btn-clear { background: #94a3b8; color: white; }
+
+        .history-section { margin-top: 30px; }
+        .history-title { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 15px;}
+
+        .card-item {
+            background: #fff; border: 1px solid #e2e8f0;
+            padding: 15px; border-radius: 12px; margin-bottom: 12px;
+        }
+
+        .tag { font-size: 10px; padding: 4px 10px; border-radius: 20px; background: #dbeafe; color: var(--primary); font-weight: 800; }
+        .date { font-size: 11px; color: #94a3b8; float: right; }
+    </style>
+</head>
+<body>
+
+<div class="app-card">
+    <div class="header">
+        <h1>Sylvia Mafra Machado</h1>
+        <p>Registro Digital de Ocorrências</p>
+    </div>
+
+    <div class="form-group">
+        <label>👤 Professor(a) Responsável</label>
+        <input type="text" id="professor" placeholder="Seu nome">
+    </div>
+
+    <div class="form-group">
+        <label>🎓 Aluno e Turma</label>
+        <div style="display: flex; gap: 10px;">
+            <input type="text" id="aluno" placeholder="Nome" style="flex: 2;">
+            <select id="turma" style="flex: 1.5; font-size: 14px;">
+                <option value="">Turma...</option>
+                <optgroup label="Ensino Fundamental">
+                    <option value="6º ano A">6º ano A</option><option value="6º ano B">6º ano B</option>
+                    <option value="7º ano A">7º ano A</option><option value="7º ano B">7º ano B</option>
+                    <option value="8º ano A">8º ano A</option><option value="8º ano B">8º ano B</option>
+                    <option value="9º ano A">9º ano A</option><option value="9º ano B">9º ano B</option>
+                </optgroup>
+                <optgroup label="Ensino Médio">
+                    <option value="1ª série A">1ª série A</option><option value="1ª série B">1ª série B</option>
+                    <option value="2ª série A">2ª série A</option><option value="3ª série A">3ª série A</option>
+                </optgroup>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>⚠️ Indisciplina</label>
+        <select id="tipo">
+            <option value="Uso de celular">📱 Uso de celular</option>
+            <option value="Conversa/Interrupção">🗣️ Conversa/Interrupção</option>
+            <option value="Equipamento inadequado">🛠️ Equipamento inadequado</option>
+            <option value="Atitude violenta">🥊 Atitude violenta</option>
+            <option value="Atividade inadequada">✍️ Atividade inadequada</option>
+            <option value="Desrespeito">😡 Desrespeito</option>
+            <option value="Atraso">🏃 Atraso</option>
+            <option value="Falta de Material">📚 Falta de Material</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>📝 Observações</label>
+        <textarea id="obs" rows="2"></textarea>
+    </div>
+
+    <button class="btn-main" id="btnSalvar" onclick="salvar()">Salvar Registro</button>
+
+    <div class="history-section">
+        <div class="history-title">
+            <h3>Registros Recentes</h3>
+            <span id="contador" style="background: var(--primary); color: white; padding: 2px 10px; border-radius: 8px;">0</span>
+        </div>
+        
+        <div class="actions-history">
+            <button class="btn-sec btn-pdf" onclick="gerarPDF()">📄 Baixar PDF</button>
+            <button class="btn-sec btn-clear" onclick="limparTudo()">🗑️ Limpar Lista</button>
+        </div>
+
+        <div id="lista" style="margin-top: 15px;"></div>
+    </div>
+</div>
+
+<script>
+    // LINK DO GOOGLE SHEETS CONECTADO
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyxlywZ5p2icMm3XAlZUEiU2llLFugyjh57Gk_fBM5Sh4CgFZjmk1nUPJMik9lPC4a3/exec";
+    
+    let registrosParaPDF = [];
+
+    async function salvar() {
+        const prof = document.getElementById('professor').value;
+        const aluno = document.getElementById('aluno').value;
+        const turma = document.getElementById('turma').value;
+        const tipo = document.getElementById('tipo').value;
+        const obs = document.getElementById('obs').value;
+        const btn = document.getElementById('btnSalvar');
+
+        if(!prof || !aluno || !turma) {
+            alert("⚠️ Por favor, preencha Professor, Aluno e Turma.");
+            return;
+        }
+
+        const agora = new Date();
+        const dataHora = agora.toLocaleDateString('pt-BR') + " " + agora.toLocaleTimeString('pt-BR', {hour:'2-digit', minute:'2-digit'});
+        const dados = { dataHora, professor: prof, aluno, turma, tipo, obs };
+
+        try {
+            btn.innerText = "Enviando para Planilha...";
+            btn.disabled = true;
+
+            // Envio para o Google Sheets
+            await fetch(SCRIPT_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Importante para evitar erros de segurança do navegador
+                cache: 'no-cache',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            // Se chegou aqui, adicionamos na lista visual
+            registrosParaPDF.unshift(dados);
+            atualizarLista();
+            
+            // Limpa apenas campos específicos
+            document.getElementById('aluno').value = "";
+            document.getElementById('obs').value = "";
+            
+            alert("✅ Sucesso! O registro foi enviado para a planilha da escola.");
+
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("❌ Erro de conexão. O registro aparecerá apenas no PDF desta vez.");
+        } finally {
+            btn.innerText = "Salvar Registro";
+            btn.disabled = false;
+        }
+    }
+
+    function atualizarLista() {
+        const lista = document.getElementById('lista');
+        lista.innerHTML = "";
+        registrosParaPDF.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card-item';
+            card.style.padding = '15px';
+            card.style.marginBottom = '10px';
+            card.style.borderLeft = '4px solid var(--primary)';
+            card.innerHTML = `
+                <span class="date">${item.dataHora.split(' ')[1]}</span>
+                <span class="tag">${item.tipo}</span>
+                <div style="margin-top: 10px;"><strong>${item.aluno}</strong> (${item.turma})</div>
+            `;
+            lista.appendChild(card);
+        });
+        document.getElementById('contador').innerText = registrosParaPDF.length;
+    }
+
+    function limparTudo() {
+        if(confirm("Deseja limpar a lista visual? Os dados na planilha não serão apagados.")) {
+            registrosParaPDF = [];
+            atualizarLista();
+        }
+    }
+
+    function gerarPDF() {
+        if(registrosParaPDF.length === 0) { alert("Sem dados para gerar PDF!"); return; }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.text("Relatório de Ocorrências - Sylvia Mafra Machado", 20, 20);
+        let y = 35;
+        registrosParaPDF.forEach((r, i) => {
+            doc.setFontSize(10);
+            doc.text(`${i+1}. ${r.aluno} (${r.turma}) - ${r.tipo}`, 20, y);
+            doc.text(`   Data: ${r.dataHora} | Prof: ${r.prof}`, 20, y + 5);
+            y += 15;
+        });
+        doc.save("ocorrencias.pdf");
+    }
+</script>
+
+</body>
+</html>
